@@ -1,0 +1,5 @@
+- hosts: all
+  roles:
+    - role: ensure-twine
+    - role: upload-pypi
+      when: zuul_success | bool

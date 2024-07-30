@@ -1,0 +1,40 @@
+- secret:
+    name: chart-vendor-pypi
+    data:
+      api_token: !encrypted/pkcs1-oaep
+        - IAWnz2E80hQUCxxCDSwCZdN3qmwXwiyo8k3U9nb4HJQd+E1cCCOYVZx6WUZ9DY1IMYh8r
+          SfHLhVbOTmpGPmKamcyt5KaOGNzRZoNwk+PY55bDufsOSXG3PHUx0w4HjajjqEUr8ExkF
+          oUOsy4R4skJfpUnnFDPhl4mVPrf4bS2oV2cAlGaw0xZErCr46M+HMV/UGdq/GSj0SzNIl
+          XgOe1uv4Hw1V8Yk2LrWpAG1xYuDc0HjqklL4H1VJviprfAsNnuqIIND4dYhYgAH2lkjmv
+          TgBlPsZx6+gtVa6uz1rTE9CNG4oxtj7rbHdHlPoGC5jFszbo7Z8h7bNoNq1fnNAR9+nYb
+          J3MhxHlreHEMfE3JGkREXx+ayCbnSvEOcXsfv5eHXnUZmIaDS1Ib+xTW0ZP1W7eq9qeHB
+          fymhQy7cQxqhFvxWXunLIcV805NB7zM3p8qL4p77mMCXjulbB1yF2dodsxNqdrXrQCV8K
+          tx/XxgRVN5r3HJPjWjnDFAsw4JCU39/YRqjSNDzovLxRCXpL2AcTSr1zTjjpYZzyWrq4Y
+          nAgR0Zysjbzb+qCkP6feb0IXQbaO+NMQOXOK/BXyLKIbnZnX5fZ//ne73or8zgLpCkj86
+          5/2OqhaSy5RlDxWBdPG1x57V+9PNVEnfC2ic9LkqVCWiJnIG4Rb/PwlEfTSE3c=
+
+- job:
+    name: chart-vendor-build
+    parent: build-python-release
+    vars:
+      release_python: python3
+
+- job:
+    name: chart-vendor-release
+    parent: chart-vendor-build
+    post-run: playbooks/release/post.yaml
+    secrets:
+      - secret: chart-vendor-pypi
+        name: pypi_info
+
+- project:
+    merge-mode: squash-merge
+    check:
+      jobs:
+        - chart-vendor-build
+    gate:
+      jobs:
+        - chart-vendor-build
+    release:
+      jobs:
+        - chart-vendor-release
