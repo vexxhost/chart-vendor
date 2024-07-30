@@ -1,0 +1,12 @@
+aiofiles!=24.1.0
+aiohttp-client-cache[filesystem]
+aiohttp-retry
+aiopath
+aioshutil
+async-lru
+asynctempfile
+loguru
+pydantic
+pydantic-yaml
+python-gerrit-api
+pyyaml
