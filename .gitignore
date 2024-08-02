@@ -2,3 +2,5 @@
 .tox
 charts
 .charts.yml
+*.egg-info
+__pycache__

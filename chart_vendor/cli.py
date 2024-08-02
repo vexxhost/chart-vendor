@@ -1,6 +1,7 @@
 # Copyright (c) 2024 VEXXHOST, Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+import argparse
 import asyncio
 import os
 import textwrap
@@ -12,7 +13,7 @@ import aiopath  # type: ignore
 import aioshutil
 from asynctempfile import NamedTemporaryFile  # type: ignore
 from gerrit import GerritClient  # type: ignore
-from pydantic import BaseModel, PrivateAttr
+from pydantic import BaseModel
 from pydantic_yaml import parse_yaml_file_as, to_yaml_file
 
 from chart_vendor import models, parsers
@@ -93,7 +94,7 @@ class Config(BaseModel):
         self,
         session: aiohttp_client_cache.CachedSession,
         chart: models.Chart,
-        path="charts",
+        path: str,
     ):
         charts_path: aiopath.AsyncPath = aiopath.AsyncPath(path)
         chart_path = charts_path / chart.name
@@ -181,7 +182,7 @@ class Config(BaseModel):
                     await patch(input=patch_data, path=chart_path)
 
 
-async def _main():
+async def _main(charts_root: str):
     config = parse_yaml_file_as(Config, ".charts.yml")
 
     async with aiohttp_retry.RetryClient(
@@ -191,9 +192,25 @@ async def _main():
         retry_options=aiohttp_retry.ExponentialRetry(attempts=3),
     ) as session:
         await asyncio.gather(
-            *[config._fetch_chart(session, chart) for chart in config.charts]
+            *[
+                config._fetch_chart(session, chart, path=charts_root)
+                for chart in config.charts
+            ]
         )
 
 
 def main():
-    asyncio.run(_main())
+    parser = argparse.ArgumentParser(description="Chart Vendor CLI")
+    parser.add_argument(
+        "--charts-root",
+        type=str,
+        default="charts",
+        help="Root path where charts are generated",
+    )
+    args = parser.parse_args()
+
+    asyncio.run(_main(args.charts_root))
+
+
+if __name__ == "__main__":
+    main()
