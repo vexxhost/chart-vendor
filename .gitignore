@@ -4,3 +4,4 @@ charts
 .charts.yml
 *.egg-info
 __pycache__
+.idea

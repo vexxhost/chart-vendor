@@ -13,6 +13,8 @@ import aiopath  # type: ignore
 import aioshutil
 from asynctempfile import NamedTemporaryFile  # type: ignore
 from gerrit import GerritClient  # type: ignore
+from git import GitCommandError, Repo
+from loguru import logger
 from pydantic import BaseModel
 from pydantic_yaml import parse_yaml_file_as, to_yaml_file
 
@@ -172,6 +174,7 @@ class Config(BaseModel):
                 await patch(input=gerrit_patch.encode(), path=chart_path)
 
         patches_path = charts_path / "patches" / chart.name
+
         if await patches_path.exists():
             patch_paths = sorted(
                 [patch_path async for patch_path in patches_path.glob("*.patch")]
@@ -182,7 +185,7 @@ class Config(BaseModel):
                     await patch(input=patch_data, path=chart_path)
 
 
-async def _main(charts_root: str):
+async def _main(charts_root: str, check: bool):
     config = parse_yaml_file_as(Config, ".charts.yml")
 
     async with aiohttp_retry.RetryClient(
@@ -198,6 +201,31 @@ async def _main(charts_root: str):
             ]
         )
 
+        if check:
+            repo = Repo(os.getcwd())
+            changed_files = [item.a_path for item in repo.index.diff(None)]
+            untracked_files = repo.untracked_files
+            if changed_files or untracked_files:
+                logger.info(
+                    "The following chart manifests have changes or are untracked:"
+                )
+                for file in changed_files:
+                    logger.info(f"Modified: {file}")
+                for file in untracked_files:
+                    logger.info(f"Untracked: {file}")
+
+                try:
+                    diff_output = repo.git.diff()
+                    if diff_output:
+                        logger.info("Diff output:")
+                        logger.info(diff_output)
+                except GitCommandError as e:
+                    logger.error(f"Failed to get git diff: {e}")
+
+                raise SystemExit(
+                    "Check failed: Uncommitted changes or untracked files found in chart manifests."
+                )
+
 
 def main():
     parser = argparse.ArgumentParser(description="Chart Vendor CLI")
@@ -207,9 +235,14 @@ def main():
         default="charts",
         help="Root path where charts are generated",
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Check if all chart manifests are applied or not",
+    )
     args = parser.parse_args()
 
-    asyncio.run(_main(args.charts_root))
+    asyncio.run(_main(args.charts_root, args.check))
 
 
 if __name__ == "__main__":

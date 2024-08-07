@@ -5,6 +5,7 @@ aiopath
 aioshutil
 async-lru
 asynctempfile
+gitpython
 loguru
 pydantic
 pydantic-yaml
