@@ -185,7 +185,7 @@ class Config(BaseModel):
                     await patch(input=patch_data, path=chart_path)
 
 
-async def _main(charts_root: str, check: bool):
+async def _main(charts_root: str, check: bool, chart_name: str = None):
     config = parse_yaml_file_as(Config, ".charts.yml")
 
     async with aiohttp_retry.RetryClient(
@@ -194,10 +194,18 @@ async def _main(charts_root: str, check: bool):
         ),
         retry_options=aiohttp_retry.ExponentialRetry(attempts=3),
     ) as session:
+        charts_to_fetch = (
+            [chart for chart in config.charts if chart.name == chart_name]
+            if chart_name
+            else config.charts
+        )
+        if not charts_to_fetch:
+            logger.warn("No chart configured to fetch.")
+            return
         await asyncio.gather(
             *[
                 config._fetch_chart(session, chart, path=charts_root)
-                for chart in config.charts
+                for chart in charts_to_fetch
             ]
         )
 
@@ -205,6 +213,7 @@ async def _main(charts_root: str, check: bool):
             repo = Repo(os.getcwd())
             changed_files = [item.a_path for item in repo.index.diff(None)]
             untracked_files = repo.untracked_files
+
             if changed_files or untracked_files:
                 logger.info(
                     "The following chart manifests have changes or are untracked:"
@@ -230,6 +239,12 @@ async def _main(charts_root: str, check: bool):
 def main():
     parser = argparse.ArgumentParser(description="Chart Vendor CLI")
     parser.add_argument(
+        "chart_name",
+        type=str,
+        nargs="?",
+        help="Name of the specific chart to fetch",
+    )
+    parser.add_argument(
         "--charts-root",
         type=str,
         default="charts",
@@ -242,7 +257,7 @@ def main():
     )
     args = parser.parse_args()
 
-    asyncio.run(_main(args.charts_root, args.check))
+    asyncio.run(_main(args.charts_root, args.check, args.chart_name))
 
 
 if __name__ == "__main__":
