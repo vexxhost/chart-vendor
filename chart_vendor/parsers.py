@@ -8,6 +8,12 @@ import aiohttp_client_cache
 import yaml  # type: ignore
 from async_lru import alru_cache
 from loguru import logger
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_random_exponential,
+)
 
 
 @alru_cache(maxsize=32)
@@ -45,6 +51,11 @@ def fetch_entry(index: dict, index_url: str, name: str, version: str):
     return entry
 
 
+@retry(
+    retry=retry_if_exception_type(ConnectionResetError),
+    wait=wait_random_exponential(multiplier=1, min=2, max=10),
+    stop=stop_after_attempt(10),
+)
 async def fetch_chart(
     session: aiohttp_client_cache.CachedSession,
     index_url: str,
