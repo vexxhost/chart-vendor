@@ -20,6 +20,30 @@
       release_python: python3
 
 - job:
+    name: chart-vendor-integration
+    parent: tox
+    abstract: true
+    run: playbooks/integration/run.yaml
+    vars:
+      tox_envlist: integration
+
+- job:
+    name: chart-vendor-integration-atmosphere
+    required-projects:
+      - vexxhost/atmosphere
+    vars:
+      tox_environment:
+        PROJECT_DIR: "{{ zuul.projects['vexxhost/atmosphere'].src_dir }}"
+
+- job:
+    name: chart-vendor-integration-magnum-cluster-api
+    required-projects:
+      - vexxhost/magnum-cluster-api
+    vars:
+      tox_environment:
+        PROJECT_DIR: "{{ zuul.projects['vexxhost/magnum-cluster-api'].src_dir }}"
+
+- job:
     name: chart-vendor-release
     parent: chart-vendor-build
     post-run: playbooks/release/post.yaml
@@ -32,9 +56,13 @@
     check:
       jobs:
         - chart-vendor-build
+        - chart-vendor-integration-atmosphere
+        - chart-vendor-integration-magnum-cluster-api
     gate:
       jobs:
         - chart-vendor-build
+        - chart-vendor-integration-atmosphere
+        - chart-vendor-integration-magnum-cluster-api
     release:
       jobs:
         - chart-vendor-release
