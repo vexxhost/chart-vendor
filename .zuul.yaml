@@ -33,7 +33,7 @@
       - vexxhost/atmosphere
     vars:
       tox_environment:
-        PROJECT_DIR: "{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}"
+        PROJECT_DIR: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}"
 
 - job:
     name: chart-vendor-integration-magnum-cluster-api
@@ -42,7 +42,7 @@
       - vexxhost/magnum-cluster-api
     vars:
       tox_environment:
-        PROJECT_DIR: "{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}"
+        PROJECT_DIR: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}"
 
 - job:
     name: chart-vendor-release
