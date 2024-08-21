@@ -23,7 +23,6 @@
     name: chart-vendor-integration
     parent: tox
     abstract: true
-    run: playbooks/integration/run.yaml
     vars:
       tox_envlist: integration
 
