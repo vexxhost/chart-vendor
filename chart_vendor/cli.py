@@ -7,6 +7,7 @@ import os
 import textwrap
 from datetime import datetime, timezone
 
+import aiohttp
 import aiohttp_client_cache
 import aiohttp_retry
 import aiopath  # type: ignore
@@ -185,12 +186,15 @@ class Config(BaseModel):
                     await patch(input=patch_data, path=chart_path)
 
 
-async def _main(charts_root: str, check: bool, chart_name: str = None):
-    config = parse_yaml_file_as(Config, ".charts.yml")
+async def _main(
+    config_file: str, charts_root: str, check: bool, chart_name: str = None
+):
+    config = parse_yaml_file_as(Config, config_file)
 
     async with aiohttp_retry.RetryClient(
         client_session=aiohttp_client_cache.CachedSession(
-            cache=aiohttp_client_cache.FileBackend(use_temp=True)
+            connector=aiohttp.TCPConnector(limit_per_host=5),
+            cache=aiohttp_client_cache.FileBackend(use_temp=True),
         ),
         retry_options=aiohttp_retry.ExponentialRetry(attempts=3),
     ) as session:
@@ -245,6 +249,12 @@ def main():
         help="Name of the specific chart to fetch",
     )
     parser.add_argument(
+        "--config-file",
+        type=str,
+        default=".charts.yml",
+        help="Configuration file for the vendored charts",
+    )
+    parser.add_argument(
         "--charts-root",
         type=str,
         default="charts",
@@ -257,7 +267,7 @@ def main():
     )
     args = parser.parse_args()
 
-    asyncio.run(_main(args.charts_root, args.check, args.chart_name))
+    asyncio.run(_main(args.config_file, args.charts_root, args.check, args.chart_name))
 
 
 if __name__ == "__main__":
