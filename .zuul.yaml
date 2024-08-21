@@ -29,6 +29,7 @@
 
 - job:
     name: chart-vendor-integration-atmosphere
+    parent: chart-vendor-integration
     required-projects:
       - vexxhost/atmosphere
     vars:
@@ -37,6 +38,7 @@
 
 - job:
     name: chart-vendor-integration-magnum-cluster-api
+    parent: chart-vendor-integration
     required-projects:
       - vexxhost/magnum-cluster-api
     vars:
