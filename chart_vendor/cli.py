@@ -7,6 +7,7 @@ import os
 import textwrap
 from datetime import datetime, timezone
 
+import aiohttp
 import aiohttp_client_cache
 import aiohttp_retry
 import aiopath  # type: ignore
@@ -192,7 +193,8 @@ async def _main(
 
     async with aiohttp_retry.RetryClient(
         client_session=aiohttp_client_cache.CachedSession(
-            cache=aiohttp_client_cache.FileBackend(use_temp=True)
+            connector=aiohttp.TCPConnector(limit_per_host=5),
+            cache=aiohttp_client_cache.FileBackend(use_temp=True),
         ),
         retry_options=aiohttp_retry.ExponentialRetry(attempts=3),
     ) as session:
