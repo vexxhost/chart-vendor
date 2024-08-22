@@ -6,6 +6,7 @@ import tarfile
 
 import aiohttp_client_cache
 import yaml  # type: ignore
+from aiohttp import client_exceptions as aiohttp_exceptions
 from async_lru import alru_cache
 from loguru import logger
 from tenacity import (
@@ -52,7 +53,7 @@ def fetch_entry(index: dict, index_url: str, name: str, version: str):
 
 
 @retry(
-    retry=retry_if_exception_type(ConnectionResetError),
+    retry=retry_if_exception_type(aiohttp_exceptions.ClientConnectorError),
     wait=wait_random_exponential(multiplier=1, min=2, max=10),
     stop=stop_after_attempt(10),
 )
