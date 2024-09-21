@@ -100,40 +100,41 @@ class Config(BaseModel):
         path: str,
     ):
         charts_path: aiopath.AsyncPath = aiopath.AsyncPath(path)
-        chart_path = charts_path / chart.name
+        chart_dir = chart.directory or chart.name
+        chart_path = charts_path / chart_dir
 
         try:
-            await aioshutil.rmtree(f"{path}/{chart.name}-{chart.version}")
+            await aioshutil.rmtree(f"{path}/{chart_dir}-{chart.version}")
         except FileNotFoundError:
             pass
 
         try:
             try:
                 os.rename(
-                    f"{path}/{chart.name}", f"{path}/{chart.name}-{chart.version}"
+                    f"{path}/{chart_dir}", f"{path}/{chart_dir}-{chart.version}"
                 )
             except FileNotFoundError:
                 pass
 
             await parsers.fetch_chart(
-                session, str(chart.repository.url), chart.name, chart.version, path
+                session, str(chart.repository.url), chart.name, chart.version, path, chart_dir
             )
         except Exception:
-            os.rename(f"{path}/{chart.name}-{chart.version}", f"{path}/{chart.name}")
+            os.rename(f"{path}/{chart_dir}-{chart.version}", f"{path}/{chart_dir}")
             raise
 
         try:
-            await aioshutil.rmtree(f"{path}/{chart.name}-{chart.version}")
+            await aioshutil.rmtree(f"{path}/{chart_dir}-{chart.version}")
         except FileNotFoundError:
             pass
 
         if chart.dependencies:
             requirements = models.ChartRequirements(dependencies=chart.dependencies)
-            to_yaml_file(f"{path}/{chart.name}/requirements.yaml", requirements)
+            to_yaml_file(f"{path}/{chart_dir}/requirements.yaml", requirements)
 
             await asyncio.gather(
                 *[
-                    aioshutil.rmtree(f"{path}/{chart.name}/charts/{req.name}")
+                    aioshutil.rmtree(f"{path}/{chart_dir}/charts/{req.name}")
                     for req in chart.dependencies
                 ]
             )
@@ -145,7 +146,8 @@ class Config(BaseModel):
                         str(req.repository),
                         req.name,
                         req.version,
-                        f"{path}/{chart.name}/charts",
+                        f"{path}/{chart_dir}/charts",
+                        req.name,
                     )
                     for req in chart.dependencies
                 ]
@@ -154,16 +156,16 @@ class Config(BaseModel):
             for req in chart.dependencies:
                 lock = parse_yaml_file_as(
                     models.ChartLock,
-                    f"{path}/{chart.name}/charts/{req.name}/requirements.lock",
+                    f"{path}/{chart_dir}/charts/{req.name}/requirements.lock",
                 )
                 lock.generated = datetime.min.replace(tzinfo=timezone.utc)
                 to_yaml_file(
-                    f"{path}/{chart.name}/charts/{req.name}/requirements.lock", lock
+                    f"{path}/{chart_dir}/charts/{req.name}/requirements.lock", lock
                 )
 
             # Reset the generated time in the lock file to make things reproducible
             to_yaml_file(
-                f"{path}/{chart.name}/requirements.lock", chart.requirements_lock
+                f"{path}/{chart_dir}/requirements.lock", chart.requirements_lock
             )
 
         for gerrit, changes in chart.patches.gerrit.items():

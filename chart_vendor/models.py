@@ -49,6 +49,7 @@ class Chart(BaseModel):
     name: str
     version: str
     repository: ChartRepository
+    directory: str
     dependencies: list[ChartDependency] = []
     patches: ChartPatches = ChartPatches()
 

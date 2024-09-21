@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import io
+import os
 import tarfile
 
 import aiohttp_client_cache
@@ -63,6 +64,7 @@ async def fetch_chart(
     name: str,
     version: str,
     path: str,
+    directory: str,
 ):
     index = await parse_remote_repository(session, index_url)
     entry = fetch_entry(index, index_url, name, version)
@@ -76,3 +78,6 @@ async def fetch_chart(
     tar_bytes = io.BytesIO(data)
     with tarfile.open(fileobj=tar_bytes) as tar:
         tar.extractall(path=path)
+
+    if name != directory:
+        os.rename(f"{path}/{name}", f"{path}/{directory}")
