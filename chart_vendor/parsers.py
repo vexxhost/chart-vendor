@@ -5,7 +5,7 @@ import io
 import os
 import tarfile
 
-import aiohttp_client_cache
+import aiohttp_retry
 import yaml  # type: ignore
 from aiohttp import client_exceptions as aiohttp_exceptions
 from async_lru import alru_cache
@@ -19,9 +19,7 @@ from tenacity import (
 
 
 @alru_cache(maxsize=32)
-async def parse_remote_repository(
-    session: aiohttp_client_cache.CachedSession, url: str
-):
+async def parse_remote_repository(session: aiohttp_retry.RetryClient, url: str):
     repo_url = str(url) + "/index.yaml"
 
     async with session.get(repo_url) as resp:
@@ -59,7 +57,7 @@ def fetch_entry(index: dict, index_url: str, name: str, version: str):
     stop=stop_after_attempt(10),
 )
 async def fetch_chart(
-    session: aiohttp_client_cache.CachedSession,
+    session: aiohttp_retry.RetryClient,
     index_url: str,
     name: str,
     version: str,

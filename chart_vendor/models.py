@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timezone
 from typing import Annotated
 
-from pydantic import AfterValidator, BaseModel, HttpUrl
+from pydantic import AfterValidator, BaseModel, HttpUrl, model_validator
 from pydantic.json import pydantic_encoder
 
 HttpUrlString = Annotated[HttpUrl, AfterValidator(str)]
@@ -52,6 +52,12 @@ class Chart(BaseModel):
     directory: str
     dependencies: list[ChartDependency] = []
     patches: ChartPatches = ChartPatches()
+
+    @model_validator(mode='before')
+    def set_defaults(cls, values: dict):
+        if "directory" not in values:
+            values["directory"] = values["name"]
+        return values
 
     @property
     def requirements_lock(self):
