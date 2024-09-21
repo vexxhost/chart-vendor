@@ -5,6 +5,7 @@ import argparse
 import asyncio
 import os
 import textwrap
+import typing
 from datetime import datetime, timezone
 
 import aiohttp
@@ -95,45 +96,53 @@ class Config(BaseModel):
 
     async def _fetch_chart(
         self,
-        session: aiohttp_client_cache.CachedSession,
+        session: aiohttp_retry.RetryClient,
         chart: models.Chart,
         path: str,
     ):
         charts_path: aiopath.AsyncPath = aiopath.AsyncPath(path)
-        chart_path = charts_path / chart.name
+        chart_path = charts_path / chart.directory
 
         try:
-            await aioshutil.rmtree(f"{path}/{chart.name}-{chart.version}")
+            await aioshutil.rmtree(f"{path}/{chart.directory}-{chart.version}")
         except FileNotFoundError:
             pass
 
         try:
             try:
                 os.rename(
-                    f"{path}/{chart.name}", f"{path}/{chart.name}-{chart.version}"
+                    f"{path}/{chart.directory}",
+                    f"{path}/{chart.directory}-{chart.version}",
                 )
             except FileNotFoundError:
                 pass
 
             await parsers.fetch_chart(
-                session, str(chart.repository.url), chart.name, chart.version, path
+                session,
+                str(chart.repository.url),
+                chart.name,
+                chart.version,
+                path,
+                chart.directory,
             )
         except Exception:
-            os.rename(f"{path}/{chart.name}-{chart.version}", f"{path}/{chart.name}")
+            os.rename(
+                f"{path}/{chart.directory}-{chart.version}", f"{path}/{chart.directory}"
+            )
             raise
 
         try:
-            await aioshutil.rmtree(f"{path}/{chart.name}-{chart.version}")
+            await aioshutil.rmtree(f"{path}/{chart.directory}-{chart.version}")
         except FileNotFoundError:
             pass
 
         if chart.dependencies:
             requirements = models.ChartRequirements(dependencies=chart.dependencies)
-            to_yaml_file(f"{path}/{chart.name}/requirements.yaml", requirements)
+            to_yaml_file(f"{path}/{chart.directory}/requirements.yaml", requirements)
 
             await asyncio.gather(
                 *[
-                    aioshutil.rmtree(f"{path}/{chart.name}/charts/{req.name}")
+                    aioshutil.rmtree(f"{path}/{chart.directory}/charts/{req.name}")
                     for req in chart.dependencies
                 ]
             )
@@ -145,7 +154,8 @@ class Config(BaseModel):
                         str(req.repository),
                         req.name,
                         req.version,
-                        f"{path}/{chart.name}/charts",
+                        f"{path}/{chart.directory}/charts",
+                        req.name,
                     )
                     for req in chart.dependencies
                 ]
@@ -154,16 +164,17 @@ class Config(BaseModel):
             for req in chart.dependencies:
                 lock = parse_yaml_file_as(
                     models.ChartLock,
-                    f"{path}/{chart.name}/charts/{req.name}/requirements.lock",
+                    f"{path}/{chart.directory}/charts/{req.name}/requirements.lock",
                 )
                 lock.generated = datetime.min.replace(tzinfo=timezone.utc)
                 to_yaml_file(
-                    f"{path}/{chart.name}/charts/{req.name}/requirements.lock", lock
+                    f"{path}/{chart.directory}/charts/{req.name}/requirements.lock",
+                    lock,
                 )
 
             # Reset the generated time in the lock file to make things reproducible
             to_yaml_file(
-                f"{path}/{chart.name}/requirements.lock", chart.requirements_lock
+                f"{path}/{chart.directory}/requirements.lock", chart.requirements_lock
             )
 
         for gerrit, changes in chart.patches.gerrit.items():
@@ -187,7 +198,10 @@ class Config(BaseModel):
 
 
 async def _main(
-    config_file: str, charts_root: str, check: bool, chart_name: str = None
+    config_file: str,
+    charts_root: str,
+    check: bool,
+    chart_name: typing.Optional[str] = None,
 ):
     config = parse_yaml_file_as(Config, config_file)
 
@@ -204,7 +218,7 @@ async def _main(
             else config.charts
         )
         if not charts_to_fetch:
-            logger.warn("No chart configured to fetch.")
+            logger.warning("No chart configured to fetch.")
             return
         await asyncio.gather(
             *[
