@@ -170,10 +170,11 @@ func FetchChart(chart config.Chart, path string) error {
 		if err != nil {
 			return err
 		}
+		fullData := append([]byte("dependencies:\n"), requirementdata...)
 
 		err = os.WriteFile(
 			fmt.Sprintf("%s/%s/requirements.yaml", path, directory),
-			requirementdata,
+			fullData,
 			0644,
 		)
 		if err != nil {
