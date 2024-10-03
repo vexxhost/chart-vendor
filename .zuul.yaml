@@ -22,8 +22,8 @@
     required-projects:
       - vexxhost/atmosphere
     vars:
-      chart_vendor_charts_root: "{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/charts"
-      chart_vendor_config_file: "{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/.charts.yml"
+      chart_vendor_charts_root: "{{ ansible_env.HOME }}{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/charts"
+      chart_vendor_config_file: "{{ ansible_env.HOME }}{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/.charts.yml"
 
 # TODO(mnaser): Move this into MCAPI
 - job:
@@ -32,8 +32,8 @@
     required-projects:
       - vexxhost/magnum-cluster-api
     vars:
-      chart_vendor_charts_root: "{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/magnum_cluster_api/charts"
-      chart_vendor_config_file: "{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/.charts.yml"
+      chart_vendor_charts_root: "{{ ansible_env.HOME }}{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/magnum_cluster_api/charts"
+      chart_vendor_config_file: "{{ ansible_env.HOME }}{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/.charts.yml"
 
 - project:
     merge-mode: squash-merge
