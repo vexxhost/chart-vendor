@@ -36,14 +36,20 @@ func Patch(logger *slog.Logger, input, directory string) error {
 		return err
 	}
 	defer os.Remove(includefiles.Name())
-	includefiles.WriteString(strings.Join(includes, "\n"))
+	_, err = includefiles.WriteString(strings.Join(includes, "\n"))
+	if err != nil {
+		return err
+	}
 
 	excludefiles, err := os.CreateTemp("", "excludes")
 	if err != nil {
 		return err
 	}
 	defer os.Remove(excludefiles.Name())
-	excludefiles.WriteString(strings.Join(excludes, "\n"))
+	_, err = excludefiles.WriteString(strings.Join(excludes, "\n"))
+	if err != nil {
+		return err
+	}
 
 	includecmd := exec.Command("filterdiff", "-p1", "-I", includefiles.Name())
 	excludecmd := exec.Command("filterdiff", "-p1", "-X", excludefiles.Name())
@@ -150,10 +156,13 @@ func FetchChart(chart config.Chart, path string) error {
 	)
 
 	if err != nil {
-		os.Rename(
+		nerr := os.Rename(
 			fmt.Sprintf("%s/%s-%s", path, directory, chart.Version),
 			fmt.Sprintf("%s/%s", path, directory),
 		)
+		if nerr != nil {
+			return nerr
+		}
 
 		return err
 	}
