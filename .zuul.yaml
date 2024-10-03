@@ -15,16 +15,6 @@
     vars:
       go_version: 1.23.1
 
-# TODO(mnaser): Move this into Atmosphere
-- job:
-    name: atmosphere-chart-vendor
-    parent: chart-vendor
-    required-projects:
-      - vexxhost/atmosphere
-    vars:
-      chart_vendor_charts_root: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/charts"
-      chart_vendor_config_file: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/.charts.yml"
-
 # TODO(mnaser): Move this into MCAPI
 - job:
     name: magnum-cluster-api-chart-vendor
