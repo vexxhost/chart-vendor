@@ -5,36 +5,43 @@ This is a simple tool which allows you to vendor Helm charts from external
 sources into your repository, with the ability to apply patches to the vendored
 charts.
 
+## Requirements
+
+- Go 1.23 or newer
+
 ## Installation
-```sh
-pip install chart-vendor
+
+First, clone the repository and build the binary:
+
+```bash
+Copy code
+git clone https://github.com/vexxhost/chart-vendor.git
+cd chart-vendor
+go build -o chart-vendor .
 ```
 
 ## Usage
-### Basic Command
-```sh
-chart-vendor [CHART_NAME]
-```
-- `CHART_NAME` (optional): The name of the specific chart to fetch. If omitted,
-all charts specified in the configuration will be fetched.
 
-### Options
-- `--charts-root`: Root path where charts are generated. Default is `charts`.
-- `--check`: Check if all chart manifests are applied or not. If there are
-uncommitted changes or untracked files, the check will fail.
+### Command-line Flags
 
-## Examples
-### Fetch All Charts
-```sh
-chart-vendor
+- `--config-file`: Specifies the configuration file for charts. Default is .charts.yml.
+- `--charts-root`: Specifies the root path where charts are stored. Default is charts.
+- `--check`: Optionally checks for uncommitted changes or untracked files.
+
+### Example Commands
+
+- Fetch Charts
+Fetch and manage vendored charts as specified in the configuration file:
+
+```bash
+./chart-vendor --config-file .charts.yml --charts-root ./charts
 ```
-### Fetch a Specific Chart
-```sh
-chart-vendor my-chart
-```
-### Check for Uncommitted Changes
-```sh
-chart-vendor --check
+
+- Check for Uncommitted Changes
+Run a check to ensure no changes are left uncommitted in the charts:
+
+```bash
+./chart-vendor --check
 ```
 
 ## Configuration

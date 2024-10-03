@@ -1,0 +1,20 @@
+- name: Install patchutils
+  become: true
+  ansible.builtin.package:
+    name: patchutils
+    state: present
+
+- name: Build chart-vendor
+  ansible.builtin.include_role:
+    name: go
+  vars:
+    go_command: build -o chart-vendor main.go
+    zuul_work_dir: "{{ zuul.projects['github.com/vexxhost/chart-vendor'].src_dir }}"
+
+- name: Copy chart-vendor binary
+  become: true
+  ansible.builtin.copy:
+    src: "{{ zuul.projects['github.com/vexxhost/chart-vendor'].src_dir }}/chart-vendor"
+    dest: /usr/local/bin/chart-vendor
+    mode: 0755
+    remote_src: true
