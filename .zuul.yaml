@@ -21,7 +21,7 @@
       - vexxhost/atmosphere
     vars:
       go_command: |
-        run main.go --charts-root {{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/charts ---config-file {{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/.charts.yml
+        run main.go --charts-root {{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/charts --config-file {{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/.charts.yml
 
 - job:
     name: chart-vendor-integration-magnum-cluster-api
@@ -30,7 +30,7 @@
       - vexxhost/magnum-cluster-api
     vars:
       go_command: |
-        run main.go --charts-root {{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/charts --config-file {{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/.charts.yml
+        run main.go --charts-root {{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/magnum_cluster_api/charts --config-file {{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/.charts.yml
 
 - project:
     merge-mode: squash-merge
