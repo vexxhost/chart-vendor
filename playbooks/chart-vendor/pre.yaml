@@ -1,3 +1,8 @@
 - hosts: all
   roles:
     - role: ensure-chart-vendor
+  tasks:
+    - name: Install patchutils
+      ansible.builtin.package:
+        name: patchutils
+        state: present
