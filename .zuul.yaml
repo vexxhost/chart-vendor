@@ -8,7 +8,7 @@
       golangci_lint_options: --timeout=5m
 
 - job:
-    name: chart-vendor-go
+    name: chart-vendor
     parent: golang-go
     abstract: true
     vars:
@@ -16,7 +16,7 @@
 
 - job:
     name: chart-vendor-integration-atmosphere
-    parent: chart-vendor-go
+    parent: chart-vendor
     required-projects:
       - vexxhost/atmosphere
     vars:
@@ -25,7 +25,7 @@
 
 - job:
     name: chart-vendor-integration-magnum-cluster-api
-    parent: chart-vendor-go
+    parent: chart-vendor
     required-projects:
       - vexxhost/magnum-cluster-api
     vars:
