@@ -8,8 +8,6 @@ charts.
 ## Requirements
 
 - Go 1.23 or newer
-- Helm 3.x installed and configured
-- Optional: Gerrit for patch management
 
 ## Installation
 
