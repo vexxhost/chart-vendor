@@ -23,8 +23,7 @@
     required-projects:
       - vexxhost/magnum-cluster-api
     vars:
-      chart_vendor_charts_root: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/magnum_cluster_api/charts"
-      chart_vendor_config_file: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/.charts.yml"
+      zuul_work_dir: "{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}"
 
 - project:
     merge-mode: squash-merge
