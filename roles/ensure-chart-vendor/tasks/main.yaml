@@ -1,3 +1,9 @@
+- name: Install patchutils
+  become: true
+  ansible.builtin.package:
+    name: patchutils
+    state: present
+
 - name: Build chart-vendor
   ansible.builtin.include_role:
     name: go
