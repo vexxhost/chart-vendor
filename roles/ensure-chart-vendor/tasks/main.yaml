@@ -10,3 +10,4 @@
   ansible.builtin.copy:
     src: "{{ zuul.projects['github.com/vexxhost/chart-vendor'].src_dir }}/chart-vendor"
     dest: /usr/local/bin/chart-vendor
+    remote_src: true
