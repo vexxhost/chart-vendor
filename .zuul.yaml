@@ -11,6 +11,7 @@
     name: chart-vendor
     parent: golang-go
     abstract: true
+    run: playbooks/chart-vendor/run.yaml
     vars:
       go_version: 1.23.1
 
