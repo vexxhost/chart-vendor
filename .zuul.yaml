@@ -16,23 +16,11 @@
     vars:
       go_version: 1.23.1
 
-# TODO(mnaser): Move this into MCAPI
-- job:
-    name: magnum-cluster-api-chart-vendor
-    parent: chart-vendor
-    required-projects:
-      - vexxhost/magnum-cluster-api
-    vars:
-      chart_vendor_charts_root: "magnum_cluster_api/charts"
-      zuul_work_dir: "{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}"
-
 - project:
     merge-mode: squash-merge
     check:
       jobs:
         - chart-vendor-golangci-lint
-        - magnum-cluster-api-chart-vendor
     gate:
       jobs:
         - chart-vendor-golangci-lint
-        - magnum-cluster-api-chart-vendor
