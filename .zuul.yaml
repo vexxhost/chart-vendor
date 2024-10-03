@@ -23,6 +23,7 @@
     required-projects:
       - vexxhost/magnum-cluster-api
     vars:
+      chart_vendor_charts_root: "magnum_cluster_api/charts"
       zuul_work_dir: "{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}"
 
 - project:
