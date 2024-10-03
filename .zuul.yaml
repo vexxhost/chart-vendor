@@ -7,43 +7,43 @@
       golangci_lint_version: 1.61.0
       golangci_lint_options: --timeout=5m
 
-# - job:
-#     name: chart-vendor
-#     parent: golang-go
-#     abstract: true
-#     run: playbooks/chart-vendor/run.yaml
-#     vars:
-#       go_version: 1.23.1
+- job:
+    name: chart-vendor
+    parent: golang-go
+    abstract: true
+    run: playbooks/chart-vendor/run.yaml
+    vars:
+      go_version: 1.23.1
 
-# # TODO(mnaser): Move this into Atmosphere
-# - job:
-#     name: atmosphere-chart-vendor
-#     parent: chart-vendor
-#     required-projects:
-#       - vexxhost/atmosphere
-#     vars:
-#       chart_vendor_charts_root: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/charts"
-#       chart_vendor_config_file: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/.charts.yml"
+# TODO(mnaser): Move this into Atmosphere
+- job:
+    name: atmosphere-chart-vendor
+    parent: chart-vendor
+    required-projects:
+      - vexxhost/atmosphere
+    vars:
+      chart_vendor_charts_root: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/charts"
+      chart_vendor_config_file: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}/.charts.yml"
 
-# # TODO(mnaser): Move this into MCAPI
-# - job:
-#     name: magnum-cluster-api-chart-vendor
-#     parent: chart-vendor
-#     required-projects:
-#       - vexxhost/magnum-cluster-api
-#     vars:
-#       chart_vendor_charts_root: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/magnum_cluster_api/charts"
-#       chart_vendor_config_file: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/.charts.yml"
+# TODO(mnaser): Move this into MCAPI
+- job:
+    name: magnum-cluster-api-chart-vendor
+    parent: chart-vendor
+    required-projects:
+      - vexxhost/magnum-cluster-api
+    vars:
+      chart_vendor_charts_root: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/magnum_cluster_api/charts"
+      chart_vendor_config_file: "{{ ansible_env.HOME }}/{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}/.charts.yml"
 
 - project:
     merge-mode: squash-merge
     check:
       jobs:
         - chart-vendor-golangci-lint
-        # - atmosphere-chart-vendor
-        # - magnum-cluster-api-chart-vendor
+        - atmosphere-chart-vendor
+        - magnum-cluster-api-chart-vendor
     gate:
       jobs:
         - chart-vendor-golangci-lint
-        # - atmosphere-chart-vendor
-        # - magnum-cluster-api-chart-vendor
+        - atmosphere-chart-vendor
+        - magnum-cluster-api-chart-vendor
