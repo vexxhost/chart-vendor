@@ -30,10 +30,8 @@
     check:
       jobs:
         - chart-vendor-golangci-lint
-        - atmosphere-chart-vendor
         - magnum-cluster-api-chart-vendor
     gate:
       jobs:
         - chart-vendor-golangci-lint
-        - atmosphere-chart-vendor
         - magnum-cluster-api-chart-vendor
