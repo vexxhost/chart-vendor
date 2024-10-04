@@ -18,11 +18,32 @@
     vars:
       go_version: 1.23.1
 
+- job:
+    name: chart-vendor-atmosphere
+    parent: chart-vendor
+    required-projects:
+      - vexxhost/atmosphere
+    vars:
+      zuul_work_dir: "{{ zuul.projects['github.com/vexxhost/atmosphere'].src_dir }}"
+
+- job:
+    name: chart-vendor-magnum-cluster-api
+    parent: chart-vendor
+    required-projects:
+      - vexxhost/magnum-cluster-api
+    vars:
+      zuul_work_dir: "{{ zuul.projects['github.com/vexxhost/magnum-cluster-api'].src_dir }}"
+      chart_vendor_charts_root: "magnum_cluster_api/charts"
+
 - project:
     merge-mode: squash-merge
     check:
       jobs:
         - chart-vendor-golangci-lint
+        - chart-vendor-atmosphere
+        - chart-vendor-magnum-cluster-api
     gate:
       jobs:
         - chart-vendor-golangci-lint
+        - chart-vendor-atmosphere
+        - chart-vendor-magnum-cluster-api
