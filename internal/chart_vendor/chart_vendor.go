@@ -242,15 +242,15 @@ func FetchChart(chart config.Chart, path string) error {
 		}
 
 		for _, changeID := range changes {
-			logger = logger.With("instance", instance, "change", changeID)
+			gLogger := logger.With("instance", instance, "change", changeID)
 
 			patch, _, err := client.Changes.GetPatch(context.TODO(), changeID, "current", nil)
 			if err != nil {
 				return err
 			}
 
-			logger.Info("applying patch")
-			err = Patch(logger, *patch, fmt.Sprintf("%s/%s", path, directory))
+			gLogger.Info("applying patch")
+			err = Patch(gLogger, *patch, fmt.Sprintf("%s/%s", path, directory))
 			if err != nil {
 				return err
 			}
@@ -269,15 +269,15 @@ func FetchChart(chart config.Chart, path string) error {
 		sort.Strings(patches)
 
 		for _, patch := range patches {
-			logger = logger.With("patch", patch)
+			lLogger := logger.With("patch", patch)
 
 			patchData, err := os.ReadFile(patch)
 			if err != nil {
 				return err
 			}
 
-			logger.Info("applying patch")
-			err = Patch(logger, string(patchData), fmt.Sprintf("%s/%s", path, directory))
+			lLogger.Info("applying patch")
+			err = Patch(lLogger, string(patchData), fmt.Sprintf("%s/%s", path, directory))
 			if err != nil {
 				return err
 			}
