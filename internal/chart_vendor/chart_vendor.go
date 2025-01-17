@@ -121,6 +121,36 @@ func Patch(logger *slog.Logger, input, directory string) error {
 	return nil
 }
 
+func PatchFromFiles(logger *slog.Logger, name string, path string, directory string) error {
+    patchesPath := fmt.Sprintf("%s/patches/%s", path, name)
+    if _, err := os.Stat(patchesPath); err == nil {
+        patches, err := filepath.Glob(
+            fmt.Sprintf("%s/*.patch", patchesPath),
+        )
+        if err != nil {
+            return err
+        }
+
+        sort.Strings(patches)
+
+        for _, patch := range patches {
+            logger = logger.With("patch", patch)
+
+            patchData, err := os.ReadFile(patch)
+            if err != nil {
+                return err
+            }
+
+            logger.Info("applying patch")
+            err = Patch(logger, string(patchData), fmt.Sprintf("%s/%s", path, directory))
+            if err != nil {
+                return err
+            }
+        }
+    }
+    return nil
+}
+
 func FetchChart(chart config.Chart, path string) error {
 	logger := slog.With("chart", chart.Name, "version", chart.Version, "repository", chart.Repository.URL)
 
@@ -213,6 +243,16 @@ func FetchChart(chart config.Chart, path string) error {
 					return err
 				}
 
+				err = PatchFromFiles(
+					logger,
+					dependency.Name,
+					path,
+					fmt.Sprintf("%s/charts/%s", directory, dependency.Name),
+				)
+				if err != nil {
+					return err
+				}
+
 				return helm.UpdateRequirementsLock(
 					fmt.Sprintf("%s/%s/charts/%s/requirements.lock", path, directory, dependency.Name),
 					nil,
@@ -257,31 +297,9 @@ func FetchChart(chart config.Chart, path string) error {
 		}
 	}
 
-	patchesPath := fmt.Sprintf("%s/patches/%s", path, chart.Name)
-	if _, err := os.Stat(patchesPath); err == nil {
-		patches, err := filepath.Glob(
-			fmt.Sprintf("%s/*.patch", patchesPath),
-		)
-		if err != nil {
-			return err
-		}
-
-		sort.Strings(patches)
-
-		for _, patch := range patches {
-			lLogger := logger.With("patch", patch)
-
-			patchData, err := os.ReadFile(patch)
-			if err != nil {
-				return err
-			}
-
-			lLogger.Info("applying patch")
-			err = Patch(lLogger, string(patchData), fmt.Sprintf("%s/%s", path, directory))
-			if err != nil {
-				return err
-			}
-		}
+	err = PatchFromFiles(logger, chart.Name, path, directory)
+	if err != nil {
+		return err
 	}
 
 	return nil
