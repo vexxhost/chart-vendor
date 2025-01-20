@@ -23,6 +23,10 @@ import (
 )
 
 func Patch(logger *slog.Logger, input, directory string) error {
+	return nil
+}
+
+func Patch2(logger *slog.Logger, input, directory string) error {
 	includes := []string{
 		fmt.Sprintf("%s/*", path.Base(directory)),
 	}
