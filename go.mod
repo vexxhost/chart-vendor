@@ -7,7 +7,7 @@ require (
 	github.com/go-git/go-git/v5 v5.16.0
 	github.com/urfave/cli/v2 v2.27.6
 	golang.org/x/sync v0.13.0
-	helm.sh/helm/v3 v3.17.2
+	helm.sh/helm/v3 v3.17.3
 	sigs.k8s.io/yaml v1.4.0
 )
 
