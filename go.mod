@@ -6,7 +6,7 @@ require (
 	github.com/andygrunwald/go-gerrit v1.1.0
 	github.com/go-git/go-git/v5 v5.16.1
 	github.com/urfave/cli/v3 v3.3.8
-	golang.org/x/sync v0.14.0
+	golang.org/x/sync v0.16.0
 	helm.sh/helm/v3 v3.17.4
 	sigs.k8s.io/yaml v1.4.0
 )
