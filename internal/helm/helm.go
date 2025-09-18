@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"helm.sh/helm/v3/pkg/chart"
@@ -14,6 +13,7 @@ import (
 	"helm.sh/helm/v3/pkg/downloader"
 	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/provenance"
+	"helm.sh/helm/v3/pkg/registry"
 	"helm.sh/helm/v3/pkg/repo"
 	"sigs.k8s.io/yaml"
 )
@@ -26,25 +26,23 @@ var (
 )
 
 func FetchChart(repoURL, name, version, path, directory string) error {
+	var (
+		chartPath string
+		url       string
+		err       error
+	)
 	getters := getter.All(settings)
+	dl := downloader.ChartDownloader{
+		Out:     os.Stderr,
+		Getters: getters,
+	}
 
-	var chartPath string
-	var err error
-
-	if strings.HasPrefix(repoURL, "oci://") {
+	if registry.IsOCI(repoURL) {
 		// OCI support
-		ref := fmt.Sprintf("%s/%s:%s", repoURL, name, version)
-		dl := downloader.ChartDownloader{
-			Out:     os.Stderr,
-			Getters: getters,
-		}
-		chartPath, _, err = dl.DownloadTo(ref, "", path)
-		if err != nil {
-			return err
-		}
+		url = fmt.Sprintf("%s/%s:%s", repoURL, name, version)
 	} else {
 		// Regular HTTP/HTTPS repo
-		url, err := repo.FindChartInRepoURL(
+		url, err = repo.FindChartInRepoURL(
 			repoURL,
 			name,
 			version,
@@ -53,16 +51,11 @@ func FetchChart(repoURL, name, version, path, directory string) error {
 		if err != nil {
 			return err
 		}
+	}
 
-		dl := downloader.ChartDownloader{
-			Out:     os.Stderr,
-			Getters: getters,
-		}
-
-		chartPath, _, err = dl.DownloadTo(url, version, path)
-		if err != nil {
-			return err
-		}
+	chartPath, _, err = dl.DownloadTo(url, version, path)
+	if err != nil {
+		return err
 	}
 
 	err = chartutil.ExpandFile(path, chartPath)
