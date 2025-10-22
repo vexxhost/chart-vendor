@@ -5,7 +5,7 @@ go 1.24.6
 require (
 	github.com/andygrunwald/go-gerrit v1.1.0
 	github.com/go-git/go-git/v5 v5.16.2
-	github.com/urfave/cli/v3 v3.4.1
+	github.com/urfave/cli/v3 v3.5.0
 	golang.org/x/sync v0.17.0
 	helm.sh/helm/v3 v3.19.0
 	sigs.k8s.io/yaml v1.6.0
