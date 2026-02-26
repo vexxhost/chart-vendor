@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/vexxhost/chart-vendor/main/charts.schema.json",
+  "title": "chart-vendor configuration",
+  "description": "Configuration file for chart-vendor (.charts.yml)",
+  "type": "object",
+  "required": ["charts"],
+  "additionalProperties": false,
+  "properties": {
+    "charts": {
+      "type": "array",
+      "description": "List of Helm charts to vendor",
+      "items": {
+        "$ref": "#/$defs/chart"
+      }
+    }
+  },
+  "$defs": {
+    "chart": {
+      "type": "object",
+      "description": "A Helm chart to vendor",
+      "required": ["name", "version", "repository"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the chart"
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of the chart"
+        },
+        "repository": {
+          "$ref": "#/$defs/chartRepository"
+        },
+        "directory": {
+          "type": "string",
+          "description": "Optional directory name override for the vendored chart"
+        },
+        "dependencies": {
+          "type": "array",
+          "description": "List of chart dependencies",
+          "items": {
+            "$ref": "#/$defs/chartDependency"
+          }
+        },
+        "patches": {
+          "$ref": "#/$defs/chartPatches"
+        }
+      }
+    },
+    "chartRepository": {
+      "type": "object",
+      "description": "Helm chart repository configuration",
+      "required": ["url"],
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "URL of the Helm chart repository",
+          "format": "uri"
+        }
+      }
+    },
+    "chartDependency": {
+      "type": "object",
+      "description": "A Helm chart dependency",
+      "required": ["name", "repository"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the dependency chart"
+        },
+        "version": {
+          "type": "string",
+          "description": "Version or version range of the dependency chart"
+        },
+        "repository": {
+          "type": "string",
+          "description": "URL of the repository containing the dependency chart",
+          "format": "uri"
+        },
+        "condition": {
+          "type": "string",
+          "description": "A YAML path that resolves to a boolean, used for enabling/disabling the chart (e.g. subchart1.enabled)"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tags used to group charts for enabling/disabling together",
+          "items": {
+            "type": "string"
+          }
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether the dependency chart should be loaded"
+        },
+        "import-values": {
+          "type": "array",
+          "description": "Mapping of source values to parent key to be imported"
+        },
+        "alias": {
+          "type": "string",
+          "description": "Alias to be used for the dependency chart"
+        }
+      }
+    },
+    "chartPatches": {
+      "type": "object",
+      "description": "Patches to apply to the vendored chart",
+      "additionalProperties": false,
+      "properties": {
+        "gerrit": {
+          "type": "object",
+          "description": "Gerrit patch sets to apply, keyed by Gerrit host",
+          "additionalProperties": {
+            "type": "array",
+            "description": "List of Gerrit change numbers to apply",
+            "items": {
+              "type": ["string", "integer"],
+              "description": "Gerrit change number"
+            }
+          }
+        }
+      }
+    }
+  }
+}

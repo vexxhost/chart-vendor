@@ -67,3 +67,21 @@ charts:
           - 12345
           - 67890
 ```
+
+### JSON Schema
+
+A [JSON Schema](charts.schema.json) is provided for `.charts.yml` to enable
+auto-completion, validation, and linting in IDEs.
+
+#### VS Code
+
+Install the [YAML extension](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)
+and add the following to your `.vscode/settings.json`:
+
+```json
+{
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/vexxhost/chart-vendor/main/charts.schema.json": ".charts.yml"
+  }
+}
+```
