@@ -18,138 +18,9 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/vexxhost/chart-vendor/internal/config"
+	"github.com/vexxhost/chart-vendor/internal/filterdiff"
 	"github.com/vexxhost/chart-vendor/internal/helm"
 )
-
-// diffSectionFilename returns the relevant filename for a diff section by
-// examining the --- and +++ lines. Falls back to the diff --git header.
-func diffSectionFilename(section []string) string {
-	var fromPath, toPath string
-	for _, line := range section {
-		if strings.HasPrefix(line, "--- ") {
-			parts := strings.Fields(strings.TrimPrefix(line, "--- "))
-			if len(parts) > 0 && parts[0] != "/dev/null" {
-				fromPath = parts[0]
-			}
-		} else if strings.HasPrefix(line, "+++ ") {
-			parts := strings.Fields(strings.TrimPrefix(line, "+++ "))
-			if len(parts) > 0 && parts[0] != "/dev/null" {
-				toPath = parts[0]
-			}
-		} else if strings.HasPrefix(line, "@@ ") {
-			break
-		}
-	}
-	if fromPath != "" {
-		return fromPath
-	}
-	if toPath != "" {
-		return toPath
-	}
-	// Fallback: parse from "diff --git a/X b/Y" header.
-	if len(section) > 0 && strings.HasPrefix(section[0], "diff --git ") {
-		rest := strings.TrimPrefix(section[0], "diff --git ")
-		if idx := strings.LastIndex(rest, " b/"); idx >= 0 && idx+3 <= len(rest) {
-			aPath := rest[:idx]
-			bPath := "b/" + rest[idx+3:]
-			if aPath == "a/dev/null" {
-				return bPath
-			}
-			return aPath
-		}
-	}
-	return ""
-}
-
-// stripPathComponents removes n leading path components from p.
-// e.g. stripPathComponents("a/chart/file.yaml", 1) returns "chart/file.yaml".
-func stripPathComponents(p string, n int) string {
-	for i := 0; i < n; i++ {
-		idx := strings.Index(p, "/")
-		if idx < 0 {
-			return p
-		}
-		p = p[idx+1:]
-	}
-	return p
-}
-
-// matchWildcard reports whether name matches pattern, where '*' matches any
-// sequence of characters (including '/') and '?' matches any single character.
-func matchWildcard(pattern, name string) bool {
-	pi, ni := 0, 0
-	starIdx := -1
-	starMatch := 0
-	for ni < len(name) {
-		if pi < len(pattern) && (pattern[pi] == '?' || pattern[pi] == name[ni]) {
-			pi++
-			ni++
-		} else if pi < len(pattern) && pattern[pi] == '*' {
-			starIdx = pi
-			starMatch = ni
-			pi++
-		} else if starIdx >= 0 {
-			pi = starIdx + 1
-			starMatch++
-			ni = starMatch
-		} else {
-			return false
-		}
-	}
-	for pi < len(pattern) && pattern[pi] == '*' {
-		pi++
-	}
-	return pi == len(pattern)
-}
-
-// filterDiff returns a filtered copy of the unified diff in input, keeping
-// only the sections for files whose path (after stripping stripComponents
-// leading path components) matches at least one include pattern and no
-// exclude pattern. Preamble lines before the first diff header are preserved.
-func filterDiff(input string, stripComponents int, includes, excludes []string) string {
-	lines := strings.Split(input, "\n")
-	var result []string
-
-	i := 0
-	// Preserve preamble lines before the first "diff " header.
-	for i < len(lines) && !strings.HasPrefix(lines[i], "diff ") {
-		result = append(result, lines[i])
-		i++
-	}
-
-	// Process each per-file section.
-	for i < len(lines) {
-		sectionStart := i
-		i++
-		for i < len(lines) && !strings.HasPrefix(lines[i], "diff ") {
-			i++
-		}
-		section := lines[sectionStart:i]
-
-		filename := diffSectionFilename(section)
-		strippedFilename := stripPathComponents(filename, stripComponents)
-
-		excluded := false
-		for _, pat := range excludes {
-			if matchWildcard(pat, strippedFilename) {
-				excluded = true
-				break
-			}
-		}
-		if excluded {
-			continue
-		}
-
-		for _, pat := range includes {
-			if matchWildcard(pat, strippedFilename) {
-				result = append(result, section...)
-				break
-			}
-		}
-	}
-
-	return strings.Join(result, "\n")
-}
 
 func Patch(logger *slog.Logger, input, directory string) error {
 	includes := []string{
@@ -160,14 +31,18 @@ func Patch(logger *slog.Logger, input, directory string) error {
 		fmt.Sprintf("%s/values_overrides/*", path.Base(directory)),
 	}
 
-	filtered := filterDiff(input, 1, includes, excludes)
+	filtered, err := filterdiff.Filter(input, 1, includes, excludes)
+	if err != nil {
+		logger.With("error", err).Error("failed to filter diff")
+		return err
+	}
 
 	var patchOutput bytes.Buffer
 	patchcmd := exec.Command("patch", "-p2", "-d", directory, "-E")
 	patchcmd.Stdin = strings.NewReader(filtered)
 	patchcmd.Stdout = &patchOutput
 
-	err := patchcmd.Run()
+	err = patchcmd.Run()
 	if err != nil {
 		logger.With("error", err).Error("failed to apply patch")
 		return err
