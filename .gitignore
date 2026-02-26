@@ -5,3 +5,4 @@ charts
 *.egg-info
 __pycache__
 .idea
+/generate-schema
