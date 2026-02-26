@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/vexxhost/chart-vendor/main/charts.schema.json",
+  "$defs": {
+    "Chart": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the chart"
+        },
+        "version": {
+          "type": "string",
+          "description": "Version of the chart"
+        },
+        "repository": {
+          "$ref": "#/$defs/ChartRepository",
+          "description": "Helm chart repository configuration"
+        },
+        "directory": {
+          "type": "string",
+          "description": "Optional directory name override for the vendored chart"
+        },
+        "dependencies": {
+          "items": {
+            "$ref": "#/$defs/Dependency"
+          },
+          "type": "array",
+          "description": "List of chart dependencies"
+        },
+        "patches": {
+          "$ref": "#/$defs/ChartPatches",
+          "description": "Patches to apply to the vendored chart"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "repository"
+      ]
+    },
+    "ChartPatches": {
+      "properties": {
+        "gerrit": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": "object",
+          "description": "Gerrit patch sets to apply keyed by Gerrit host"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ChartRepository": {
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the Helm chart repository"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "url"
+      ]
+    },
+    "Dependency": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the dependency chart. This must match the name in the dependency's Chart.yaml."
+        },
+        "version": {
+          "type": "string",
+          "description": "Version or version range of the dependency chart"
+        },
+        "repository": {
+          "type": "string",
+          "description": "URL of the repository containing the dependency chart"
+        },
+        "condition": {
+          "type": "string",
+          "description": "A YAML path that resolves to a boolean, used for enabling/disabling the chart (e.g. subchart1.enabled)"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Tags used to group charts for enabling/disabling together"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether the dependency chart should be loaded"
+        },
+        "import-values": {
+          "items": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "properties": {
+                  "child": {
+                    "type": "string"
+                  },
+                  "parent": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "child",
+                  "parent"
+                ]
+              }
+            ]
+          },
+          "type": "array",
+          "description": "Mapping of source values to parent key to be imported"
+        },
+        "alias": {
+          "type": "string",
+          "description": "Alias to be used for the dependency chart"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name",
+        "repository"
+      ],
+      "description": "A Helm chart dependency"
+    }
+  },
+  "properties": {
+    "charts": {
+      "items": {
+        "$ref": "#/$defs/Chart"
+      },
+      "type": "array",
+      "description": "List of Helm charts to vendor"
+    }
+  },
+  "additionalProperties": false,
+  "type": "object",
+  "required": [
+    "charts"
+  ],
+  "title": "chart-vendor configuration",
+  "description": "Configuration file for chart-vendor (.charts.yml)"
+}
