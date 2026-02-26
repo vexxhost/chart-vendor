@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -19,6 +18,7 @@ import (
 	"sigs.k8s.io/yaml"
 
 	"github.com/vexxhost/chart-vendor/internal/config"
+	"github.com/vexxhost/chart-vendor/internal/filterdiff"
 	"github.com/vexxhost/chart-vendor/internal/helm"
 )
 
@@ -31,100 +31,18 @@ func Patch(logger *slog.Logger, input, directory string) error {
 		fmt.Sprintf("%s/values_overrides/*", path.Base(directory)),
 	}
 
-	includefiles, err := os.CreateTemp("", "includes")
+	filtered, err := filterdiff.Filter(input, 1, includes, excludes)
 	if err != nil {
-		return err
-	}
-	defer func() {
-    if err := os.Remove(includefiles.Name()); err != nil {
-        logger.With("error", err).Error("failed to remove temporary include file")
-    }
-	}()
-	_, err = includefiles.WriteString(strings.Join(includes, "\n"))
-	if err != nil {
+		logger.With("error", err).Error("failed to filter diff")
 		return err
 	}
 
-	excludefiles, err := os.CreateTemp("", "excludes")
-	if err != nil {
-		return err
-	}
-	defer func() {
-    if err := os.Remove(excludefiles.Name()); err != nil {
-        logger.With("error", err).Error("failed to remove temporary exclude file")
-    }
-	}()
-	_, err = excludefiles.WriteString(strings.Join(excludes, "\n"))
-	if err != nil {
-		return err
-	}
-
-	includecmd := exec.Command("filterdiff", "-p1", "-I", includefiles.Name())
-	excludecmd := exec.Command("filterdiff", "-p1", "-X", excludefiles.Name())
+	var patchOutput bytes.Buffer
 	patchcmd := exec.Command("patch", "-p2", "-d", directory, "-E")
+	patchcmd.Stdin = strings.NewReader(filtered)
+	patchcmd.Stdout = &patchOutput
 
-	stdin, err := includecmd.StdinPipe()
-	if err != nil {
-		return err
-	}
-
-	go func() {
-    defer func() {
-				if err := stdin.Close(); err != nil {
-						logger.With("error", err).Error("failed to close stdin")
-				}
-		}()
-		_, err = io.WriteString(stdin, input)
-	}()
-
-	excludepipereader, excludepipewriter := io.Pipe()
-	patchpipereader, patchpipewriter := io.Pipe()
-
-	includecmd.Stdout = excludepipewriter
-
-	excludecmd.Stdin = excludepipereader
-	excludecmd.Stdout = patchpipewriter
-
-	var patch bytes.Buffer
-	patchcmd.Stdin = patchpipereader
-	patchcmd.Stdout = &patch
-
-	err = includecmd.Start()
-	if err != nil {
-		return err
-	}
-
-	err = excludecmd.Start()
-	if err != nil {
-		return err
-	}
-
-	err = patchcmd.Start()
-	if err != nil {
-		return err
-	}
-
-	err = includecmd.Wait()
-	if err != nil {
-		return errors.Join(err, fmt.Errorf("failed to run include filterdiff"))
-	}
-
-	err = excludepipewriter.Close()
-	if err != nil {
-		return err
-	}
-
-	err = excludecmd.Wait()
-	if err != nil {
-		return errors.Join(err, fmt.Errorf("failed to run exclude filterdiff"))
-	}
-
-	err = patchpipewriter.Close()
-	if err != nil {
-		return err
-	}
-
-	err = patchcmd.Wait()
+	err = patchcmd.Run()
 	if err != nil {
 		logger.With("error", err).Error("failed to apply patch")
 		return err
