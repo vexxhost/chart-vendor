@@ -5,8 +5,10 @@ go 1.24.6
 require (
 	github.com/andygrunwald/go-gerrit v1.1.1
 	github.com/go-git/go-git/v5 v5.16.4
+	github.com/invopop/jsonschema v0.13.0
 	github.com/sourcegraph/go-diff v0.7.0
 	github.com/urfave/cli/v3 v3.6.1
+	github.com/wk8/go-ordered-map/v2 v2.1.8
 	golang.org/x/sync v0.19.0
 	helm.sh/helm/v3 v3.19.4
 	sigs.k8s.io/yaml v1.6.0
@@ -20,7 +22,9 @@ require (
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
+	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
+	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/chai2010/gettext-go v1.0.3 // indirect
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/containerd/containerd v1.7.29 // indirect
