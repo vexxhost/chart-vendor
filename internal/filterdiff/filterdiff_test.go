@@ -658,7 +658,9 @@ func runFilterdiff(t *testing.T, input string, includes, excludes []string) stri
 	if err != nil {
 		t.Fatal(err)
 	}
-	includeFile.Close()
+	if err := includeFile.Close(); err != nil {
+		t.Fatal(err)
+	}
 
 	// Write exclude patterns to temp file
 	excludeFile, err := os.CreateTemp(t.TempDir(), "excludes")
@@ -669,7 +671,9 @@ func runFilterdiff(t *testing.T, input string, includes, excludes []string) stri
 	if err != nil {
 		t.Fatal(err)
 	}
-	excludeFile.Close()
+	if err := excludeFile.Close(); err != nil {
+		t.Fatal(err)
+	}
 
 	// Run: filterdiff -p1 -I includes | filterdiff -p1 -X excludes
 	includeCmd := exec.Command("filterdiff", "-p1", "-I", includeFile.Name())
