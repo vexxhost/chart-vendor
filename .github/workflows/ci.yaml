@@ -31,3 +31,31 @@ jobs:
           go-version: stable
       - name: Run tests
         run: go test ./...
+
+  integration:
+    name: integration (${{ matrix.repo }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        include:
+          - repo: magnum-cluster-api
+            charts-root: magnum_cluster_api/charts
+          - repo: atmosphere
+            charts-root: charts
+    steps:
+      - name: Checkout chart-vendor
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          path: chart-vendor
+      - name: Checkout target repo
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          repository: vexxhost/${{ matrix.repo }}
+          path: target
+      - name: Run chart-vendor --check
+        uses: ./chart-vendor
+        with:
+          working-directory: ${{ github.workspace }}/target
+          charts-root: ${{ matrix.charts-root }}
