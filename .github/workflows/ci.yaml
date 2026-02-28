@@ -33,6 +33,7 @@ jobs:
         run: go test ./...
 
   integration:
+    name: integration (${{ matrix.repo }})
     runs-on: ubuntu-latest
     permissions:
       contents: read
