@@ -1,4 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>vexxhost/.github"]
+  "extends": ["local>vexxhost/.github"],
+  "reviewers": ["mnaser"],
+  "packageRules": [
+    {
+      "matchManagers": ["gomod"],
+      "automerge": true
+    }
+  ]
 }
