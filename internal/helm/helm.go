@@ -41,17 +41,12 @@ func FetchChart(repoURL, name, version, path, directory string) error {
 		ContentCache: helmpath.CachePath("content"),
 	}
 
-	chartPath, _, err := dl.DownloadTo(url, version, path)
+	cachePath, _, err := dl.DownloadToCache(url, version)
 	if err != nil {
 		return err
 	}
 
-	err = chartutil.ExpandFile(path, chartPath)
-	if err != nil {
-		return err
-	}
-
-	err = os.Remove(chartPath)
+	err = chartutil.ExpandFile(path, cachePath)
 	if err != nil {
 		return err
 	}
