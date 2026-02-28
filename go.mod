@@ -10,7 +10,7 @@ require (
 	github.com/urfave/cli/v3 v3.6.2
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 	golang.org/x/sync v0.19.0
-	helm.sh/helm/v3 v3.20.0
+	helm.sh/helm/v4 v4.1.1
 	helm.sh/helm/v4 v4.1.1
 	sigs.k8s.io/yaml v1.6.0
 )
