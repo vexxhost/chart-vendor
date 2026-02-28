@@ -7,21 +7,19 @@ import (
 	"os"
 	"time"
 
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chartutil"
-	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/downloader"
-	"helm.sh/helm/v3/pkg/getter"
-	"helm.sh/helm/v3/pkg/provenance"
-	"helm.sh/helm/v3/pkg/repo"
+	chart "helm.sh/helm/v4/pkg/chart/v2"
+	chartutil "helm.sh/helm/v4/pkg/chart/v2/util"
+	"helm.sh/helm/v4/pkg/cli"
+	"helm.sh/helm/v4/pkg/downloader"
+	"helm.sh/helm/v4/pkg/getter"
+	"helm.sh/helm/v4/pkg/helmpath"
+	"helm.sh/helm/v4/pkg/provenance"
+	repo "helm.sh/helm/v4/pkg/repo/v1"
 	"sigs.k8s.io/yaml"
 )
 
 var (
-	settings = &cli.EnvSettings{
-		// RepositoryConfig: repoConfig,
-		// RepositoryCache:  repoCache,
-	}
+	settings = cli.New()
 )
 
 func FetchChart(repoURL, name, version, path, directory string) error {
@@ -30,18 +28,17 @@ func FetchChart(repoURL, name, version, path, directory string) error {
 	url, err := repo.FindChartInRepoURL(
 		repoURL,
 		name,
-		version,
-		"", "", "", getters,
+		getters,
+		repo.WithChartVersion(version),
 	)
 	if err != nil {
 		return err
 	}
 
 	dl := downloader.ChartDownloader{
-		Out: os.Stderr,
-		// RepositoryConfig: repoConfig,
-		// RepositoryCache:  repoCache,
-		Getters: getters,
+		Out:          os.Stderr,
+		Getters:      getters,
+		ContentCache: helmpath.CachePath("content"),
 	}
 
 	chartPath, _, err := dl.DownloadTo(url, version, path)
