@@ -14,6 +14,7 @@ import (
 	"helm.sh/helm/v4/pkg/getter"
 	"helm.sh/helm/v4/pkg/helmpath"
 	"helm.sh/helm/v4/pkg/provenance"
+	"helm.sh/helm/v4/pkg/registry"
 	repo "helm.sh/helm/v4/pkg/repo/v1"
 	"sigs.k8s.io/yaml"
 )
@@ -23,17 +24,12 @@ var (
 )
 
 func FetchChart(repoURL, name, version, path, directory string) error {
-	getters := getter.All(settings)
-
-	url, err := repo.FindChartInRepoURL(
-		repoURL,
-		name,
-		getters,
-		repo.WithChartVersion(version),
+	var (
+		chartURL string
+		err      error
 	)
-	if err != nil {
-		return err
-	}
+
+	getters := getter.All(settings)
 
 	dl := downloader.ChartDownloader{
 		Out:          os.Stderr,
@@ -41,7 +37,27 @@ func FetchChart(repoURL, name, version, path, directory string) error {
 		ContentCache: helmpath.CachePath("content"),
 	}
 
-	cachePath, _, err := dl.DownloadToCache(url, version)
+	if registry.IsOCI(repoURL) {
+		chartURL = fmt.Sprintf("%s/%s:%s", repoURL, name, version)
+
+		registryClient, err := registry.NewClient()
+		if err != nil {
+			return err
+		}
+		dl.RegistryClient = registryClient
+	} else {
+		chartURL, err = repo.FindChartInRepoURL(
+			repoURL,
+			name,
+			getters,
+			repo.WithChartVersion(version),
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	cachePath, _, err := dl.DownloadToCache(chartURL, version)
 	if err != nil {
 		return err
 	}
