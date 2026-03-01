@@ -18,7 +18,7 @@ runs:
     - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
       with:
         go-version-file: "${{ github.action_path }}/go.mod"
-    - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+    - uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ~/.cache/helm/content
         key: helm-content-${{ hashFiles(format('{0}/{1}', inputs.working-directory, inputs.config-file)) }}
