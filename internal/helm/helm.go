@@ -40,9 +40,9 @@ func FetchChart(repoURL, name, version, path, directory string) error {
 	if registry.IsOCI(repoURL) {
 		chartURL = fmt.Sprintf("%s/%s:%s", repoURL, name, version)
 
-		registryClient, err := registry.NewClient()
-		if err != nil {
-			return err
+		registryClient, rerr := registry.NewClient()
+		if rerr != nil {
+			return rerr
 		}
 		dl.RegistryClient = registryClient
 	} else {
