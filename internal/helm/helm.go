@@ -24,27 +24,23 @@ var (
 )
 
 func FetchChart(repoURL, name, version, path, directory string) error {
-	var (
-		chartURL string
-		err      error
-	)
-
 	getters := getter.All(settings)
 
-	dl := downloader.ChartDownloader{
-		Out:          os.Stderr,
-		Getters:      getters,
-		ContentCache: helmpath.CachePath("content"),
+	registryClient, err := registry.NewClient()
+	if err != nil {
+		return err
 	}
 
+	dl := downloader.ChartDownloader{
+		Out:            os.Stderr,
+		Getters:        getters,
+		ContentCache:   helmpath.CachePath("content"),
+		RegistryClient: registryClient,
+	}
+
+	var chartURL string
 	if registry.IsOCI(repoURL) {
 		chartURL = fmt.Sprintf("%s/%s:%s", repoURL, name, version)
-
-		registryClient, rerr := registry.NewClient()
-		if rerr != nil {
-			return rerr
-		}
-		dl.RegistryClient = registryClient
 	} else {
 		chartURL, err = repo.FindChartInRepoURL(
 			repoURL,
