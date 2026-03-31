@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/andygrunwald/go-gerrit v1.1.1
-	github.com/go-git/go-git/v5 v5.17.1
+	github.com/go-git/go-git/v5 v5.17.2
 	github.com/invopop/jsonschema v0.13.0
 	github.com/sourcegraph/go-diff v0.7.0
 	github.com/urfave/cli/v3 v3.8.0
