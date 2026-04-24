@@ -6,7 +6,7 @@ require (
 	github.com/andygrunwald/go-gerrit v1.1.1
 	github.com/go-git/go-git/v5 v5.18.0
 	github.com/invopop/jsonschema v0.13.0
-	github.com/sourcegraph/go-diff v0.7.0
+	github.com/sourcegraph/go-diff v0.8.0
 	github.com/urfave/cli/v3 v3.8.0
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 	golang.org/x/sync v0.20.0
