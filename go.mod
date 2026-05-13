@@ -6,9 +6,9 @@ require (
 	github.com/andygrunwald/go-gerrit v1.1.1
 	github.com/go-git/go-git/v5 v5.19.0
 	github.com/invopop/jsonschema v0.14.0
+	github.com/pb33f/ordered-map/v2 v2.3.1
 	github.com/sourcegraph/go-diff v0.8.0
 	github.com/urfave/cli/v3 v3.9.0
-	github.com/wk8/go-ordered-map/v2 v2.1.8
 	golang.org/x/sync v0.20.0
 	helm.sh/helm/v4 v4.1.4
 	sigs.k8s.io/yaml v1.6.0
@@ -71,7 +71,6 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pjbgf/sha1cd v0.6.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect

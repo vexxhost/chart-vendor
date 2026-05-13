@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/invopop/jsonschema"
-	orderedmap "github.com/wk8/go-ordered-map/v2"
+	orderedmap "github.com/pb33f/ordered-map/v2"
 )
 
 // GenerateSchema returns the JSON schema for the Config type, derived from
