@@ -5,10 +5,10 @@ go 1.25.0
 require (
 	github.com/andygrunwald/go-gerrit v1.1.1
 	github.com/go-git/go-git/v5 v5.19.0
-	github.com/invopop/jsonschema v0.13.0
+	github.com/invopop/jsonschema v0.14.0
+	github.com/pb33f/ordered-map/v2 v2.3.1
 	github.com/sourcegraph/go-diff v0.8.0
 	github.com/urfave/cli/v3 v3.9.0
-	github.com/wk8/go-ordered-map/v2 v2.1.8
 	golang.org/x/sync v0.20.0
 	helm.sh/helm/v4 v4.1.4
 	sigs.k8s.io/yaml v1.6.0
@@ -24,7 +24,7 @@ require (
 	github.com/ProtonMail/go-crypto v1.3.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
-	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/buger/jsonparser v1.1.2 // indirect
 	github.com/chai2010/gettext-go v1.0.3 // indirect
 	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/cyphar/filepath-securejoin v0.6.1 // indirect
@@ -88,6 +88,7 @@ require (
 	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
+	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
 	golang.org/x/crypto v0.50.0 // indirect
 	golang.org/x/net v0.53.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
