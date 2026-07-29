@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/andygrunwald/go-gerrit v1.1.1
-	github.com/go-git/go-git/v5 v5.19.1
+	github.com/go-git/go-git/v5 v5.19.2
 	github.com/invopop/jsonschema v0.14.0
 	github.com/pb33f/ordered-map/v2 v2.3.1
 	github.com/sourcegraph/go-diff v0.8.0
