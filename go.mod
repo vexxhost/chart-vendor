@@ -10,7 +10,7 @@ require (
 	github.com/sourcegraph/go-diff v0.8.0
 	github.com/urfave/cli/v3 v3.10.1
 	golang.org/x/sync v0.22.0
-	helm.sh/helm/v4 v4.2.3
+	helm.sh/helm/v4 v4.2.4
 	sigs.k8s.io/yaml v1.6.0
 )
 
