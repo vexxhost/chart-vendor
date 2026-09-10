@@ -7,7 +7,7 @@ require (
 	github.com/go-git/go-git/v5 v5.19.2
 	github.com/invopop/jsonschema v0.14.0
 	github.com/pb33f/ordered-map/v2 v2.3.1
-	github.com/sourcegraph/go-diff v0.8.0
+	github.com/sourcegraph/go-diff v0.9.0
 	github.com/urfave/cli/v3 v3.11.0
 	golang.org/x/sync v0.23.0
 	helm.sh/helm/v4 v4.3.0
